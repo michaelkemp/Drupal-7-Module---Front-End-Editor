@@ -1,0 +1,182 @@
+<?php
+
+function feedit_menu() {
+    $items = array();
+    $items['feeditAjaxSave'] = array(
+        'title' => 'Save Node Data',
+        'page callback' => 'feeditAjaxSave',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
+    );
+    return $items;
+}
+
+
+function feeditAjaxSave() {
+    global $user;
+    if ($user->uid == 0) { exit("error"); }
+    
+    $json = file_get_contents('php://input');
+    $obj = json_decode($json,true);
+    
+    $nid = isset($obj['node']) ? intval($obj['node']) : 0;
+    $field = isset($obj['field']) ? trim($obj['field']) : "";
+    $html = isset($obj['html']) ? trim($obj['html']) : "";
+    
+    // REPLACE STYLES WITH CLASSES
+    $html = preg_replace("/<([u|o])l.*class=\"[a-z\-]+\".*(start=\"[0-9]+\").*style=\"list-style-type: ([a-z\-]+).*>/","<ol class=\"$1l-$3\" $2>",$html);
+    $html = preg_replace("/<([u|o])l.*class=\"[a-z\-]+\".*style=\"list-style-type: ([a-z\-]+).*>/","<ol class=\"$1l-$2\">",$html);
+    $html = preg_replace("/<([u|o])l.*style=\"list-style-type: ([a-z\-]+).*>/","<ol class=\"$1l-$2\">",$html);    
+    
+    if (($nid != 0) && ($field != "")) {
+        // DONT UPDATE NODE UNLESS USER HAS RIGHTS!!
+        $node = node_load($nid);
+        $account = user_load($user->uid);
+        if (node_access('update', $node, $account)) {
+            $node->{$field}[LANGUAGE_NONE][0]['value'] = $html;
+            $node->{$field}[LANGUAGE_NONE][0]['safe_value'] = $html;
+            node_save($node);
+            echo "ok";
+        } else {
+            echo "error";
+        }
+    } else {
+        echo "error";
+    }
+
+}
+
+
+function feedit_block_info(){
+    $blocks = array();
+    $blocks['feeditBlock'] = array(
+        'info' => t("Front End Edit"),
+        'cache' => DRUPAL_CACHE_PER_PAGE,
+    );
+    return $blocks;
+}
+
+function feedit_block_view($block_name = ""){
+    switch ($block_name) {
+        case 'feeditBlock':
+            $block['subject'] = t("Front End Edit");
+            $block['content'] = feeditEdit();
+            return $block;
+    }
+}
+
+
+function feeditEdit() {
+    global $user;
+    $nid = (arg(0) == 'node' && is_numeric(arg(1))) ? arg(1) : 0;
+    
+    // If user not logged in OR not a node
+    if (($user->uid == 0) || ($nid == 0)) { return array('#type'=>'markup', '#prefix'=>'', '#markup'=>'', '#suffix'=>''); }
+    
+    // If user does not have update rights on the node
+    $node = node_load($nid);
+    $account = user_load($user->uid);
+    if (!node_access('update', $node, $account)) { return array('#type'=>'markup', '#prefix'=>'', '#markup'=>'', '#suffix'=>''); }
+
+    
+    $curPath = drupal_get_path_alias(current_path());
+    $modPath = '/' . drupal_get_path('module', 'feedit');
+    
+    $gear = "<img src='${modPath}/images/gear.png'>";
+    $css = ".feedit-backend, .feedit-toggle { height:33px; padding: 2px 5px 5px 5px; }";
+    $css.= ".feedit-backend img { height: 16px; width: 16px; }";
+    drupal_add_css($css, 'inline');
+    
+    if (isset($_GET["edit"])) {
+// ============================================================= ENABLE FEEDIT =============================================================
+
+$ckeditor = $modPath . '/ckeditor/ckeditor.js';
+drupal_add_js($ckeditor, array('type'=>'file'));
+
+$js=<<<JS
+    (function ($) { jQuery(document).ready(function($) {
+        
+        CKEDITOR.disableAutoInline = true;
+        
+        var editCnt = 1;
+        
+        $('div[contenteditable="false"]').each(function() {
+            var id = "editor" + editCnt;
+            ++editCnt;
+            
+            $(this).attr('id',id);
+            $(this).attr('contenteditable','true');
+            
+            var editor = CKEDITOR.inline(id);
+            editor.on( 'change', function( evt ) {
+                if (evt.editor.checkDirty()) {
+                    evt.editor.getCommand('saveAjax').enable();
+                } else {
+                    evt.editor.getCommand('saveAjax').disable();
+                }
+            });
+            
+        });    
+        
+    }); }(jQuery));    
+JS;
+drupal_add_js($js, 'inline');
+            
+            $html = "<a href='/${curPath}'><button class='feedit-toggle'>Edit Off</button></a>";
+            if ($nid) {
+                $html.= "<a href='/node/${nid}/edit'><button class='feedit-backend'>${gear}</button></a>";
+            }
+            $output = array (
+                '#type' => 'markup',
+                '#prefix' => '<div class="feedit-buttons">',
+                '#markup' => $html,
+                '#suffix' => '</div>',
+                );
+            return $output; 
+            
+    } else {
+// ============================================================= DISABLE FEEDIT =============================================================
+            
+            $html = "<a href='/${curPath}?edit=1'><button class='feedit-toggle'>Edit On</button></a>";
+            if ($nid) {
+                $html.= "<a href='/node/${nid}/edit'><button class='feedit-backend'>${gear}</button></a>";
+            }
+            $output = array (
+                '#type' => 'markup',
+                '#prefix' => '<div class="feedit-buttons">',
+                '#markup' => $html,
+                '#suffix' => '</div>',
+                );
+            return $output;         
+    }
+    
+}
+
+function feedit_preprocess_field(&$variables) {
+    global $user;
+
+    $nid = (arg(0) == 'node' && is_numeric(arg(1))) ? arg(1) : 0;
+    $admin = path_is_admin(current_path());
+    
+    // If user logged in AND is a node AND not in backend
+    if (($user->uid != 0) && ($nid != 0) && (!$admin)) {
+        $node = node_load($nid);
+        $account = user_load($user->uid);
+        // check user has update rights on the node
+        if (node_access('update', $node, $account)) {
+            $fieldName = isset($variables['element']['#field_name']) ? $variables['element']['#field_name'] : ""; // field_name
+            $fieldType = isset($variables['element']['#field_type']) ? $variables['element']['#field_type'] : ""; // text_with_summary
+            $viewMode = isset($variables['element']['#view_mode']) ? $variables['element']['#view_mode'] : ""; // full
+            $fieldFormat = isset($variables['element']['#items'][0]['format']) ? $variables['element']['#items'][0]['format'] : ""; // filtered_html
+            
+            $nodeID = isset($variables['element']['#object']->nid) ? $variables['element']['#object']->nid : 0;
+            
+            if ( ($fieldType=='text_with_summary') && ($fieldFormat=='filtered_html') ) {
+                $markup = isset($variables['items'][0]['#markup']) ? $variables['items'][0]['#markup'] : "";
+                if ($markup != "") {
+                    $variables['items'][0]['#markup'] = "<div data-node='${nodeID}' data-field='${fieldName}' contenteditable='false'>${markup}</div>";
+                }
+            }
+        }
+    }
+}
