@@ -1,7 +1,7 @@
 name = "Front End Editor"
 description = "Simple Front End editor for 'Long Text' fields"
 core = "7.x"
-version = 2.19
+version = 2.20
 files[] = feedit.module
 
 stylesheets[all][] = css/feedit.css

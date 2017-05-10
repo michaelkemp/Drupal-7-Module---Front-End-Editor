@@ -171,7 +171,7 @@ function feedit_preprocess_field(&$variables) {
             
             $nodeID = isset($variables['element']['#object']->nid) ? $variables['element']['#object']->nid : 0;
             
-            if ( ($fieldType=='text_with_summary') && ($fieldFormat=='filtered_html') ) {
+            if ( (($fieldType=='text_with_summary') && ($fieldFormat=='filtered_html')) || (($fieldType=='text_long') && ($fieldFormat=='filtered_html')) ) {
                 $markup = isset($variables['items'][0]['#markup']) ? $variables['items'][0]['#markup'] : "";
                 if ($markup != "") {
                     $variables['items'][0]['#markup'] = "<div data-node='${nodeID}' data-field='${fieldName}' contenteditable='false'>${markup}</div>";
