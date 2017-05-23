@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function feedit_install() {
+
+    // ============================= ADD ALLOWABLE TAGS for FRONT END EDITING ==================================
+    $format_id = 'filtered_html';
+    $format = filter_format_load($format_id);
+    $filters = filter_list_format($format_id);
+    foreach ($filters as $filter_id => $filter_opts) {
+        $filters[$filter_id] = (array) $filter_opts;
+        if ($filter_id == 'filter_html') {
+            $filters[$filter_id]['settings']['allowed_html'] = '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h1> <h2> <h3> <h4> <table> <tr> <td> <th> <thead> <tbody> ';
+        }
+    }
+    $format->filters = $filters;
+    filter_format_save($format);
+
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function feedit_uninstall() {
+    
+    // ============================= REMOVE FRONT END EDITING TAGS ==================================
+    $format_id = 'filtered_html';
+    $format = filter_format_load($format_id);
+    $filters = filter_list_format($format_id);
+    foreach ($filters as $filter_id => $filter_opts) {
+        $filters[$filter_id] = (array) $filter_opts;
+        if ($filter_id == 'filter_html') {
+            $filters[$filter_id]['settings']['allowed_html'] = '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> ';
+        }
+    }
+    $format->filters = $filters;
+    filter_format_save($format);
+    
+}
