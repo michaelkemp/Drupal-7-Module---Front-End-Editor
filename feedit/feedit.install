@@ -12,7 +12,7 @@ function feedit_install() {
     foreach ($filters as $filter_id => $filter_opts) {
         $filters[$filter_id] = (array) $filter_opts;
         if ($filter_id == 'filter_html') {
-            $filters[$filter_id]['settings']['allowed_html'] = '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h1> <h2> <h3> <h4> <table> <tr> <td> <th> <thead> <tbody> ';
+            $filters[$filter_id]['settings']['allowed_html'] = '<a> <em> <strong> <u> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h1> <h2> <h3> <h4> <table> <tr> <td> <th> <thead> <tbody> ';
         }
     }
     $format->filters = $filters;
@@ -32,7 +32,7 @@ function feedit_uninstall() {
     foreach ($filters as $filter_id => $filter_opts) {
         $filters[$filter_id] = (array) $filter_opts;
         if ($filter_id == 'filter_html') {
-            $filters[$filter_id]['settings']['allowed_html'] = '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> ';
+            $filters[$filter_id]['settings']['allowed_html'] = '<a> <em> <strong> <u> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> ';
         }
     }
     $format->filters = $filters;
