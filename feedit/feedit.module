@@ -79,8 +79,8 @@ function feeditEdit() {
     if (!node_access('update', $node, $account)) { return array('#type'=>'markup', '#prefix'=>'', '#markup'=>'', '#suffix'=>''); }
 
     
-    $curPath = drupal_get_path_alias(current_path());
-    $modPath = '/' . drupal_get_path('module', 'feedit');
+    $curPath = url(current_path(), array('alias'=>false,'absolute'=>true));
+    $modPath = url(drupal_get_path('module', 'feedit'), array('alias'=>false,'absolute'=>true));
     
     $gear = "<img src='${modPath}/images/gear.png'>";
     $css = ".feedit-backend, .feedit-toggle { height:33px; padding: 2px 5px 5px 5px; }";
@@ -122,9 +122,10 @@ $js=<<<JS
 JS;
 drupal_add_js($js, 'inline');
             
-            $html = "<a href='/${curPath}'><button class='feedit-toggle'>Edit Off</button></a>";
+            $html = "<a href='${curPath}'><button class='feedit-toggle'>Edit Off</button></a>";
             if ($nid) {
-                $html.= "<a href='/node/${nid}/edit'><button class='feedit-backend'>${gear}</button></a>";
+                $url = url("node/${nid}/edit", array('alias'=>false,'absolute'=>true));
+                $html.= "<a href='${url}'><button class='feedit-backend'>${gear}</button></a>";
             }
             $output = array (
                 '#type' => 'markup',
@@ -137,9 +138,10 @@ drupal_add_js($js, 'inline');
     } else {
 // ============================================================= DISABLE FEEDIT =============================================================
             
-            $html = "<a href='/${curPath}?edit=1'><button class='feedit-toggle'>Edit On</button></a>";
+            $html = "<a href='${curPath}?edit=1'><button class='feedit-toggle'>Edit On</button></a>";
             if ($nid) {
-                $html.= "<a href='/node/${nid}/edit'><button class='feedit-backend'>${gear}</button></a>";
+                $url = url("node/${nid}/edit", array('alias'=>false,'absolute'=>true));
+                $html.= "<a href='${url}'><button class='feedit-backend'>${gear}</button></a>";
             }
             $output = array (
                 '#type' => 'markup',
