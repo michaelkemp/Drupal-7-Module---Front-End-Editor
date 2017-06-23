@@ -1,7 +1,7 @@
 name = "Front End Editor"
 description = "Simple Front End editor for 'Long Text' fields"
 core = "7.x"
-version = 2.46
+version = 2.50
 
 files[] = feedit.module
 files[] = feedit.install

@@ -156,6 +156,7 @@ drupal_add_js($js, 'inline');
 
 function feedit_preprocess_field(&$variables) {
     global $user;
+    global $base_url;
 
     $nid = (arg(0) == 'node' && is_numeric(arg(1))) ? arg(1) : 0;
     $admin = path_is_admin(current_path());
@@ -176,7 +177,7 @@ function feedit_preprocess_field(&$variables) {
             if ( (($fieldType=='text_with_summary') && ($fieldFormat=='filtered_html')) || (($fieldType=='text_long') && ($fieldFormat=='filtered_html')) ) {
                 $markup = isset($variables['items'][0]['#markup']) ? $variables['items'][0]['#markup'] : "";
                 if ($markup != "") {
-                    $variables['items'][0]['#markup'] = "<div data-node='${nodeID}' data-field='${fieldName}' contenteditable='false'>${markup}</div>";
+                    $variables['items'][0]['#markup'] = "<div data-url='${base_url}' data-node='${nodeID}' data-field='${fieldName}' contenteditable='false'>${markup}</div>";
                 }
             }
         }
