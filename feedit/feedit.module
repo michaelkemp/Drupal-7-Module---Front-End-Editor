@@ -68,6 +68,8 @@ function feedit_block_view($block_name = ""){
 
 function feeditEdit() {
     global $user;
+    global $base_url;
+
     $nid = (arg(0) == 'node' && is_numeric(arg(1))) ? arg(1) : 0;
     
     // If user not logged in OR not a node
@@ -80,7 +82,7 @@ function feeditEdit() {
 
     
     $curPath = url(current_path(), array('alias'=>false,'absolute'=>true));
-    $modPath = url(drupal_get_path('module', 'feedit'), array('alias'=>false,'absolute'=>true));
+    $modPath = $base_url . "/". drupal_get_path('module', 'feedit');
     
     $gear = "<img src='${modPath}/images/gear.png'>";
     $css = ".feedit-backend, .feedit-toggle { height:33px; padding: 2px 5px 5px 5px; }";
@@ -122,6 +124,7 @@ $js=<<<JS
 JS;
 drupal_add_js($js, 'inline');
             
+// ============================================================= DISABLE FEEDIT =============================================================
             $html = "<a href='${curPath}'><button class='feedit-toggle'>Edit Off</button></a>";
             if ($nid) {
                 $url = url("node/${nid}/edit", array('alias'=>false,'absolute'=>true));
@@ -136,9 +139,10 @@ drupal_add_js($js, 'inline');
             return $output; 
             
     } else {
-// ============================================================= DISABLE FEEDIT =============================================================
+// ============================================================= ENABLE FEEDIT =============================================================
             
-            $html = "<a href='${curPath}?edit=1'><button class='feedit-toggle'>Edit On</button></a>";
+            $editPath = (strpos($curPath,"?") === false) ? "${curPath}?edit=1" : "${curPath}&edit=1";
+            $html = "<a href='${editPath}'><button class='feedit-toggle'>Edit On</button></a>";
             if ($nid) {
                 $url = url("node/${nid}/edit", array('alias'=>false,'absolute'=>true));
                 $html.= "<a href='${url}'><button class='feedit-backend'>${gear}</button></a>";
