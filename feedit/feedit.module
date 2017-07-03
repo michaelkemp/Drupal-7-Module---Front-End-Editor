@@ -1,5 +1,17 @@
 <?php
 
+function feedit_init() {
+	$css = variable_get('feedit_EXTRA_CSS', '');
+	if (trim($css) != "") {
+		drupal_add_css($css, array('type' => 'inline', 'group' => CSS_THEME) );
+	}
+}
+
+function feedit_ckeditor_settings_alter(&$settings, $conf) {
+	$settings["js_conf"]["extraAllowedContent"] = " 'ul(*);ol(*);p(*);div(*);span(*);' ";
+	$settings["format_tags"] = "p;div;h1;h2;h3;h4";
+}
+
 function feedit_menu() {
     $items = array();
     $items['feeditAjaxSave'] = array(
@@ -8,7 +20,31 @@ function feedit_menu() {
         'access arguments' => array('access content'),
         'type' => MENU_CALLBACK
     );
+	  $items['admin/config/content/feedit'] = array(
+	    'title' => 'Front End Edit Config',
+	    'description' => 'Configuration for Front End Edit module',
+	    'page callback' => 'drupal_get_form',
+	    'page arguments' => array('feedit_form'),
+	    'access arguments' => array('access administration pages'),
+	    'type' => MENU_NORMAL_ITEM,
+	  );
+
     return $items;
+}
+
+function feedit_form($form, &$form_state) {
+
+    $form['feedit_EXTRA_CSS'] = array(
+        '#type' => 'textarea',
+        '#title' => t('CSS to apply to User Added Classes'),
+        '#default_value' => variable_get('feedit_EXTRA_CSS', ''),
+        '#description' => t("CSS to apply to 'User Added' classes."),
+        '#rows' => 20,
+        '#cols' => 80,
+        '#required' => FALSE,
+    );
+
+    return system_settings_form($form);
 }
 
 
@@ -23,11 +59,64 @@ function feeditAjaxSave() {
     $field = isset($obj['field']) ? trim($obj['field']) : "";
     $html = isset($obj['html']) ? trim($obj['html']) : "";
     
-    // REPLACE STYLES WITH CLASSES
-    $html = preg_replace("/<([u|o])l.*class=\"[a-z\-]+\".*(start=\"[0-9]+\").*style=\"list-style-type: ([a-z\-]+).*>/","<ol class=\"$1l-$3\" $2>",$html);
-    $html = preg_replace("/<([u|o])l.*class=\"[a-z\-]+\".*style=\"list-style-type: ([a-z\-]+).*>/","<ol class=\"$1l-$2\">",$html);
-    $html = preg_replace("/<([u|o])l.*style=\"list-style-type: ([a-z\-]+).*>/","<ol class=\"$1l-$2\">",$html);    
-    
+    // ================================ START -- REPLACE STYLES WITH CLASSES ================================
+	$listC2S = array(
+		"ul-circle"			=>	"list-style-type:circle",
+		"ul-disc"			=>	"list-style-type:disc",
+		"ul-square"			=>	"list-style-type:square",
+		"ol-lower-roman"	=>	"list-style-type:lower-roman",
+		"ol-upper-roman"	=>	"list-style-type:upper-roman",
+		"ol-lower-alpha"	=>	"list-style-type:lower-alpha",
+		"ol-upper-alpha"	=>	"list-style-type:upper-alpha",
+		"ol-decimal"		=>	"list-style-type:decimal"
+		);
+	$textC2S = array(
+		"text-align-center"	=>  "text-align:center",
+		"text-align-right"	=>  "text-align:right"
+		);
+	$tags = array("p","ul","ol");
+
+	$dom=new DomDocument();
+	$dom->encoding = 'utf-8';
+	$dom->strictErrorChecking = false;
+	$dom->loadHTML(utf8_decode($html));
+	foreach($tags as $tag) {
+		foreach($dom->getElementsByTagName($tag) as $item) {
+			$class=strtolower($item->getAttribute('class'));
+			$style=strtolower(str_replace(" ","",$item->getAttribute('style')));
+			
+			// CHECK LIST STYLES
+			if (feedInStr($style, $listC2S)) {
+				foreach($listC2S as $cl=>$st) {
+					$class=str_replace($cl, "", $class);
+				}
+				foreach($listC2S as $cl=>$st) {
+					if(strpos($style,$st) !== false) {
+						$class.= " " . $cl;
+					}
+				}
+				
+			}
+			
+			// CHECK TEXT ALIGN STYLES
+			if (feedInStr($style, $textC2S)) {
+				foreach($textC2S as $cl=>$st) {
+					$class=str_replace($cl, "", $class);
+				}
+				foreach($textC2S as $cl=>$st) {
+					if(strpos($style,$st) !== false) {
+						$class.= " " . $cl;
+					}
+				}
+			}
+			$class = trim(preg_replace('/\s+/', ' ', $class));
+			$item->removeAttribute('style');
+			$item->setAttribute('class', $class);
+			$html=$dom->saveHTML();
+		}
+	}
+    // ================================ END -- REPLACE STYLES WITH CLASSES ================================
+
     if (($nid != 0) && ($field != "")) {
         // DONT UPDATE NODE UNLESS USER HAS RIGHTS!!
         $node = node_load($nid);
@@ -46,6 +135,15 @@ function feeditAjaxSave() {
 
 }
 
+function feedInStr($string, $array) {
+    $values = array_values($array);
+    foreach ($values as $val) { 
+		if (strpos($string, $val) !== false) { 
+            return true;
+        }
+    }
+    return false;
+}
 
 function feedit_block_info(){
     $blocks = array();

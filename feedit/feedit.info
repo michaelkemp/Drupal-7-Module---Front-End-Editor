@@ -1,7 +1,9 @@
 name = "Front End Editor"
-description = "Simple Front End editor for 'Long Text' fields"
+description = "Simple Front End editor for 'filtered_html' in 'Long Text' fields"
 core = "7.x"
-version = 2.55
+version = 3.12
+
+configure = admin/config/content/feedit
 
 files[] = feedit.module
 files[] = feedit.install

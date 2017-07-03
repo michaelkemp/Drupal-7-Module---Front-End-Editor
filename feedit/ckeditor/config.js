@@ -10,29 +10,30 @@ CKEDITOR.editorConfig = function( config ) {
 
     // http://ckeditor.com/latest/samples/toolbarconfigurator/index.html
 
-    config.extraPlugins = 'save,dialog,dialogui,menu,contextmenu,panel,floatpanel,liststyle';
-    config.extraAllowedContent = 'ul(*); ol(*)';
-    
+    config.extraPlugins = 'sourcedialog,save,dialog,dialogui,menu,contextmenu,panel,floatpanel,liststyle,menubutton,button,htmlbuttons,justify';
+    config.extraAllowedContent = 'ul(*);ol(*);p(*);div(*);span(*);';
+
 	config.toolbarGroups = [
-        { name: 'document', groups: [ 'mode', 'document', 'doctools' ] },
+		{ name: 'save', groups: [ 'save' ] },
+		{ name: 'document', groups: [ 'document', 'mode', 'doctools' ] },
 		{ name: 'clipboard', groups: [ 'clipboard', 'undo' ] },
-		{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
 		{ name: 'editing', groups: [ 'find', 'selection', 'spellchecker', 'editing' ] },
 		{ name: 'forms', groups: [ 'forms' ] },
-		{ name: 'styles', groups: [ 'styles', 'Format' ] },
+		{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
 		{ name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi', 'paragraph' ] },
+		'/',
 		{ name: 'links', groups: [ 'links' ] },
 		{ name: 'insert', groups: [ 'insert' ] },
-		'/',
-		'/',
+		{ name: 'styles', groups: [ 'styles' ] },
 		{ name: 'colors', groups: [ 'colors' ] },
 		{ name: 'tools', groups: [ 'tools' ] },
 		{ name: 'others', groups: [ 'others' ] },
 		{ name: 'about', groups: [ 'about' ] }
 	];
     
-    config.format_tags = 'p;h1;h2;h3;h4';
+    config.format_tags = 'p;div;h1;h2;h3;h4';
     
-	config.removeButtons = 'Source,Templates,NewPage,Preview,Print,PasteFromWord,Find,SelectAll,Scayt,Form,Replace,Radio,Checkbox,TextField,Textarea,Select,Button,ImageButton,HiddenField,Strike,Subscript,Superscript,CopyFormatting,Blockquote,CreateDiv,JustifyLeft,JustifyCenter,JustifyRight,JustifyBlock,Language,BidiRtl,BidiLtr,Image,Flash,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Styles,TextColor,BGColor,ShowBlocks,Maximize,About,Font,FontSize';
+	config.removeButtons = 'NewPage,Preview,Print,Templates,PasteFromWord,Find,SelectAll,Scayt,Form,Textarea,Select,Checkbox,Radio,Button,TextField,ImageButton,Strike,CopyFormatting,Subscript,Superscript,JustifyBlock,BidiLtr,BidiRtl,Language,Image,Flash,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Styles,Font,FontSize,TextColor,BGColor,Maximize,ShowBlocks,About';
 
 };
+

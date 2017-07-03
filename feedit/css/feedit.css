@@ -6,3 +6,5 @@
 .ol-lower-alpha { list-style-type: lower-alpha; } 
 .ol-upper-alpha { list-style-type: upper-alpha; } 
 .ol-decimal     { list-style-type: decimal; } 
+.text-align-center { text-align: center; }
+.text-align-right  { text-align: right; }

@@ -14,7 +14,7 @@ CKEDITOR.plugins.add( 'save', {
         editor.ui.addButton('Save', {
             label: 'Save',
             command: 'saveAjax',
-            toolbar: 'doctools',
+            toolbar: 'save',
         });
     },
     

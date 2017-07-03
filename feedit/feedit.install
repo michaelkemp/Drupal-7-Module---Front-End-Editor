@@ -5,18 +5,65 @@
  */
 function feedit_install() {
 
-    // ============================= ADD ALLOWABLE TAGS for FRONT END EDITING ==================================
+    // ============================= ADD ALLOWABLE TAGS for FILTERED_HTML ==================================
     $format_id = 'filtered_html';
     $format = filter_format_load($format_id);
     $filters = filter_list_format($format_id);
     foreach ($filters as $filter_id => $filter_opts) {
         $filters[$filter_id] = (array) $filter_opts;
         if ($filter_id == 'filter_html') {
-            $filters[$filter_id]['settings']['allowed_html'] = '<a> <em> <strong> <u> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h1> <h2> <h3> <h4> <table> <tr> <td> <th> <thead> <tbody> ';
+            $filters[$filter_id]['settings']['allowed_html'] = '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <u> <p> <div> <span> <br> <h1> <h2> <h3> <h4> <table> <tr> <td> <th> <thead> <tbody> <tfoot> ';
         }
     }
     $format->filters = $filters;
     filter_format_save($format);
+
+$default=<<<CSS
+
+    .feedit-span-class {
+        font-size: 28px;
+        font-style: normal;
+        font-weight: 400;
+        color: #002E5D;
+        font-family: "Vitesse A", "Vitesse B", Georgia, serif;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .feedit-button-class {
+        margin-top: 15px;
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 100;
+        color: #FFF;
+        font-family: "Vitesse A", "Vitesse B", Georgia, serif;
+        padding:8px 16px;
+        background-color: #777;
+        text-decoration: none;
+        display: inline-block;
+        text-align:center;
+        box-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        white-space: nowrap;
+    }
+
+    .feedit-button-class:hover {
+        background-color: #555;
+    }
+
+    .feedit-button-anchor-class:before {
+        content: ''; 
+        display:block;
+    }
+
+    .feedit-button-anchor-class:after {
+        content: ''; 
+        display:block;
+    }
+
+
+CSS;
+
+    variable_set('feedit_EXTRA_CSS', $default);
 
 }
 
@@ -32,10 +79,10 @@ function feedit_uninstall() {
     foreach ($filters as $filter_id => $filter_opts) {
         $filters[$filter_id] = (array) $filter_opts;
         if ($filter_id == 'filter_html') {
-            $filters[$filter_id]['settings']['allowed_html'] = '<a> <em> <strong> <u> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> ';
+            $filters[$filter_id]['settings']['allowed_html'] = '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd>';
         }
     }
     $format->filters = $filters;
     filter_format_save($format);
-    
+    variable_del('feedit_EXTRA_CSS');
 }
