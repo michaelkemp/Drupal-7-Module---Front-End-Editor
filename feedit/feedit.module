@@ -76,45 +76,47 @@ function feeditAjaxSave() {
 		);
 	$tags = array("p","ul","ol");
 
-	$dom=new DomDocument();
-	$dom->encoding = 'utf-8';
-	$dom->strictErrorChecking = false;
-	$dom->loadHTML(utf8_decode($html));
-	foreach($tags as $tag) {
-		foreach($dom->getElementsByTagName($tag) as $item) {
-			$class=strtolower($item->getAttribute('class'));
-			$style=strtolower(str_replace(" ","",$item->getAttribute('style')));
-			
-			// CHECK LIST STYLES
-			if (feedInStr($style, $listC2S)) {
-				foreach($listC2S as $cl=>$st) {
-					$class=str_replace($cl, "", $class);
-				}
-				foreach($listC2S as $cl=>$st) {
-					if(strpos($style,$st) !== false) {
-						$class.= " " . $cl;
-					}
-				}
-				
-			}
-			
-			// CHECK TEXT ALIGN STYLES
-			if (feedInStr($style, $textC2S)) {
-				foreach($textC2S as $cl=>$st) {
-					$class=str_replace($cl, "", $class);
-				}
-				foreach($textC2S as $cl=>$st) {
-					if(strpos($style,$st) !== false) {
-						$class.= " " . $cl;
-					}
-				}
-			}
-			$class = trim(preg_replace('/\s+/', ' ', $class));
-			$item->removeAttribute('style');
-			$item->setAttribute('class', $class);
-			$html=$dom->saveHTML();
-		}
-	}
+    if ($html != "") {
+    	$dom=new DomDocument();
+    	$dom->encoding = 'utf-8';
+    	$dom->strictErrorChecking = false;
+    	$dom->loadHTML(utf8_decode($html));
+    	foreach($tags as $tag) {
+    		foreach($dom->getElementsByTagName($tag) as $item) {
+    			$class=strtolower($item->getAttribute('class'));
+    			$style=strtolower(str_replace(" ","",$item->getAttribute('style')));
+    			
+    			// CHECK LIST STYLES
+    			if (feedInStr($style, $listC2S)) {
+    				foreach($listC2S as $cl=>$st) {
+    					$class=str_replace($cl, "", $class);
+    				}
+    				foreach($listC2S as $cl=>$st) {
+    					if(strpos($style,$st) !== false) {
+    						$class.= " " . $cl;
+    					}
+    				}
+    				
+    			}
+    			
+    			// CHECK TEXT ALIGN STYLES
+    			if (feedInStr($style, $textC2S)) {
+    				foreach($textC2S as $cl=>$st) {
+    					$class=str_replace($cl, "", $class);
+    				}
+    				foreach($textC2S as $cl=>$st) {
+    					if(strpos($style,$st) !== false) {
+    						$class.= " " . $cl;
+    					}
+    				}
+    			}
+    			$class = trim(preg_replace('/\s+/', ' ', $class));
+    			$item->removeAttribute('style');
+    			$item->setAttribute('class', $class);
+    			$html=$dom->saveHTML();
+    		}
+    	}
+    }    
     // ================================ END -- REPLACE STYLES WITH CLASSES ================================
 
     if (($nid != 0) && ($field != "")) {
