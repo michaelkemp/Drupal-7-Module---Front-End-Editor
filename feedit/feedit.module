@@ -59,6 +59,8 @@ function feeditAjaxSave() {
     $field = isset($obj['field']) ? trim($obj['field']) : "";
     $html = isset($obj['html']) ? trim($obj['html']) : "";
     
+	$html = str_replace(array("\r", "\n"), "", $html); // remove carriage returns
+    
     // ================================ START -- REPLACE STYLES WITH CLASSES ================================
 	$listC2S = array(
 		"ul-circle"			=>	"list-style-type:circle",
@@ -80,6 +82,8 @@ function feeditAjaxSave() {
     	$dom=new DomDocument();
     	$dom->encoding = 'utf-8';
     	$dom->strictErrorChecking = false;
+		$dom->preserveWhiteSpace = false;
+		$dom->formatOutput = false;
     	$dom->loadHTML(utf8_decode($html));
     	foreach($tags as $tag) {
     		foreach($dom->getElementsByTagName($tag) as $item) {

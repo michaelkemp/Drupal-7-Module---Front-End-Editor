@@ -1,7 +1,6 @@
 name = "Front End Editor"
 description = "Simple Front End editor for 'filtered_html' in 'Long Text' fields"
 core = "7.x"
-version = 3.14
 
 configure = admin/config/content/feedit
 
