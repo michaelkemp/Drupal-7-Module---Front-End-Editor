@@ -84,7 +84,7 @@ function feeditAjaxSave() {
     	$dom->strictErrorChecking = false;
 		$dom->preserveWhiteSpace = false;
 		$dom->formatOutput = false;
-    	$dom->loadHTML(utf8_decode($html));
+    	$dom->loadHTML(utf8_decode($html), LIBXML_HTML_NODEFDTD | LIBXML_HTML_NOIMPLIED);
     	foreach($tags as $tag) {
     		foreach($dom->getElementsByTagName($tag) as $item) {
     			$class=strtolower($item->getAttribute('class'));
