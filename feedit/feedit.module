@@ -77,50 +77,56 @@ function feeditAjaxSave() {
 		"text-align-right"	=>  "text-align:right"
 		);
 	$tags = array("p","ul","ol");
-
+    
     if ($html != "") {
-    	$dom=new DomDocument();
-    	$dom->encoding = 'utf-8';
-    	$dom->strictErrorChecking = false;
-		$dom->preserveWhiteSpace = false;
-		$dom->formatOutput = false;
-    	$dom->loadHTML(utf8_decode($html), LIBXML_HTML_NODEFDTD | LIBXML_HTML_NOIMPLIED);
-    	foreach($tags as $tag) {
-    		foreach($dom->getElementsByTagName($tag) as $item) {
-    			$class=strtolower($item->getAttribute('class'));
-    			$style=strtolower(str_replace(" ","",$item->getAttribute('style')));
-    			
-    			// CHECK LIST STYLES
-    			if (feedInStr($style, $listC2S)) {
-    				foreach($listC2S as $cl=>$st) {
-    					$class=str_replace($cl, "", $class);
-    				}
-    				foreach($listC2S as $cl=>$st) {
-    					if(strpos($style,$st) !== false) {
-    						$class.= " " . $cl;
-    					}
-    				}
-    				
-    			}
-    			
-    			// CHECK TEXT ALIGN STYLES
-    			if (feedInStr($style, $textC2S)) {
-    				foreach($textC2S as $cl=>$st) {
-    					$class=str_replace($cl, "", $class);
-    				}
-    				foreach($textC2S as $cl=>$st) {
-    					if(strpos($style,$st) !== false) {
-    						$class.= " " . $cl;
-    					}
-    				}
-    			}
-    			$class = trim(preg_replace('/\s+/', ' ', $class));
-    			$item->removeAttribute('style');
-    			$item->setAttribute('class', $class);
-    			$html=$dom->saveHTML();
-    		}
-    	}
-    }    
+        $dom=new DomDocument();
+        $dom->encoding = 'utf-8';
+        $dom->strictErrorChecking = false;
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = false;
+        if (defined('LIBXML_HTML_NODEFDTD') && defined('LIBXML_HTML_NOIMPLIED')) {
+            $dom->loadHTML(utf8_decode($html), LIBXML_HTML_NODEFDTD | LIBXML_HTML_NOIMPLIED);
+        } else {
+            $dom->loadHTML(utf8_decode($html));
+            $dom->removeChild($dom->doctype);
+        }
+        foreach($tags as $tag) {
+            foreach($dom->getElementsByTagName($tag) as $item) {
+                $class=strtolower($item->getAttribute('class'));
+                $style=strtolower(str_replace(" ","",$item->getAttribute('style')));
+                
+                // CHECK LIST STYLES
+                if (feedInStr($style, $listC2S)) {
+                    foreach($listC2S as $cl=>$st) {
+                        $class=str_replace($cl, "", $class);
+                    }
+                    foreach($listC2S as $cl=>$st) {
+                        if(strpos($style,$st) !== false) {
+                            $class.= " " . $cl;
+                        }
+                    }
+                    
+                }
+                
+                // CHECK TEXT ALIGN STYLES
+                if (feedInStr($style, $textC2S)) {
+                    foreach($textC2S as $cl=>$st) {
+                        $class=str_replace($cl, "", $class);
+                    }
+                    foreach($textC2S as $cl=>$st) {
+                        if(strpos($style,$st) !== false) {
+                            $class.= " " . $cl;
+                        }
+                    }
+                }
+                $class = trim(preg_replace('/\s+/', ' ', $class));
+                $item->removeAttribute('style');
+                $item->setAttribute('class', $class);
+                $html=$dom->saveHTML();
+                $html=str_replace(array("<html>","</html>","<body>","</body>"), "", $html);
+            }
+        }
+    } 
     // ================================ END -- REPLACE STYLES WITH CLASSES ================================
 
     if (($nid != 0) && ($field != "")) {
@@ -265,23 +271,24 @@ drupal_add_js($js, 'inline');
 function feedit_preprocess_field(&$variables) {
     global $user;
     global $base_url;
-
-    $nid = (arg(0) == 'node' && is_numeric(arg(1))) ? arg(1) : 0;
+    
+    $account = user_load($user->uid);
     $admin = path_is_admin(current_path());
+    $nid = (arg(0) == 'node' && is_numeric(arg(1))) ? arg(1) : 0;
+    
     
     // If user logged in AND is a node AND not in backend
     if (($user->uid != 0) && ($nid != 0) && (!$admin)) {
-        $node = node_load($nid);
-        $account = user_load($user->uid);
-        // check user has update rights on the node
+        $fieldName = isset($variables['element']['#field_name']) ? $variables['element']['#field_name'] : ""; // field_name
+        $fieldType = isset($variables['element']['#field_type']) ? $variables['element']['#field_type'] : ""; // text_with_summary
+        $viewMode = isset($variables['element']['#view_mode']) ? $variables['element']['#view_mode'] : ""; // full
+        $fieldFormat = isset($variables['element']['#items'][0]['format']) ? $variables['element']['#items'][0]['format'] : ""; // filtered_html
+        $nodeID = isset($variables['element']['#object']->nid) ? $variables['element']['#object']->nid : 0;
+
+        $node = node_load($nodeID);
+        
+        // check user has update rights on the node element
         if (node_access('update', $node, $account)) {
-            $fieldName = isset($variables['element']['#field_name']) ? $variables['element']['#field_name'] : ""; // field_name
-            $fieldType = isset($variables['element']['#field_type']) ? $variables['element']['#field_type'] : ""; // text_with_summary
-            $viewMode = isset($variables['element']['#view_mode']) ? $variables['element']['#view_mode'] : ""; // full
-            $fieldFormat = isset($variables['element']['#items'][0]['format']) ? $variables['element']['#items'][0]['format'] : ""; // filtered_html
-            
-            $nodeID = isset($variables['element']['#object']->nid) ? $variables['element']['#object']->nid : 0;
-            
             if ( (($fieldType=='text_with_summary') && ($fieldFormat=='filtered_html')) || (($fieldType=='text_long') && ($fieldFormat=='filtered_html')) ) {
                 $markup = isset($variables['items'][0]['#markup']) ? $variables['items'][0]['#markup'] : "";
                 if ($markup != "") {
