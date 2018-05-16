@@ -10,7 +10,7 @@ CKEDITOR.editorConfig = function( config ) {
 
     // http://ckeditor.com/latest/samples/toolbarconfigurator/index.html
 
-    config.extraPlugins = 'sourcedialog,save,dialog,dialogui,menu,contextmenu,panel,floatpanel,liststyle,menubutton,button,htmlbuttons,justify';
+    config.extraPlugins = 'sourcedialog,save,dialog,dialogui,menu,contextmenu,panel,floatpanel,liststyle,menubutton,button,feeditclass,justify';
     config.extraAllowedContent = 'ul(*);ol(*);p(*);div(*);span(*);';
 
 	config.toolbarGroups = [
